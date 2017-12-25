@@ -1,5 +1,5 @@
 # sfinderServer
-back-end TCP/UDP server for sfinder Project; 3G,5G Compatible, not for Lora.
+back-end TCP/UDP server connected with devices; 3G,5G Compatible, not for Lora.
 
 # File Structures
 
