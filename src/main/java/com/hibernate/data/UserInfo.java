@@ -1,18 +1,31 @@
 package com.hibernate.data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="UserInfo")
 public class UserInfo {
 	
-	@javax.persistence.Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@Column(name="Id", updatable=false, insertable = false)
 	private int Id;
+	@javax.persistence.Id
+	@Column(name="Username", updatable=false)
 	private String Username;
 	private String Password;
 	private String Phone;
+	private String Email;
 	
+	public String getEmail() {
+		return Email;
+	}
+	public void setEmail(String email) {
+		Email = email;
+	}
 	public int getId() {
 		return Id;
 	}

@@ -3,11 +3,15 @@ package com.communication;
 import java.io.*;
 import java.net.Socket;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.criterion.Restrictions;
 
 import com.hibernate.data.DeviceInfo;
 import com.hibernate.data.DeviceInfoHistory;
@@ -38,22 +42,33 @@ public class TCPServerThread extends Thread {
 		dIH.setDevId(GPSDataMap.get("DevId"));
 		dIH.setLon(Double.parseDouble(GPSDataMap.get("Lon"))*0.01);
 		dIH.setLat(Double.parseDouble(GPSDataMap.get("Lat"))*0.01);
-		dIH.setApt(Double.parseDouble(GPSDataMap.get("Apt")) * 0.01);
+		dIH.setApt(Double.parseDouble(GPSDataMap.get("Apt")) * 0.01); 
 		
 		long currTime = System.currentTimeMillis();  
 		Timestamp timeObj = new Timestamp(currTime); 
 		dI.setTime(timeObj);
+				
+        Session session = sF.openSession();
+        //update Device History Table with normal Device's owner
+        Criteria cR = session.createCriteria(DeviceInfo.class);    
+		cR.add(Restrictions.eq("DevId", dI.getDevId()));    
+		List<DeviceInfo> Result = (List<DeviceInfo>) cR.list();
+		dIH.setUsername(Result.get(0).getUsername()); 
 		
-		Session session = sF.openSession();
-		session.beginTransaction();
-		session.saveOrUpdate(dI);
-		session.getTransaction().commit();
-		
-		session.beginTransaction();
-		session.saveOrUpdate(dIH);
-		session.getTransaction().commit();
-		
-		session.close();
+	    try {  
+	    	session.beginTransaction();
+			session.saveOrUpdate(dI);
+	        session.getTransaction().commit();
+	        
+	        session.beginTransaction();
+			session.saveOrUpdate(dIH);
+			session.getTransaction().commit();
+	    } catch (HibernateException Err) {
+	    	System.out.println(Err.getMessage());
+	    } finally {  
+	        session.close();  
+	        session = null;  
+	    }
     }
 
     //thread operations, response to the request
